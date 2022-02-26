@@ -4,7 +4,9 @@ import psycopg2
 import time
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkintermapview import TkinterMapView
 import pandas as pd
+import os
 
 def connect(host, database, user, password):
     # Connect to the db
@@ -16,8 +18,27 @@ def connect(host, database, user, password):
             password=password)
     except:
         print(f"Unable to connect to the database.")
-
     return con
+
+def check_exists(con, table):
+
+    cur = con.cursor()
+    query = f"SELECT CASE WHEN (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' AND  TABLE_NAME = '{str(table)}')) THEN 'TRUE' ELSE 'FALSE' END;"
+    try:
+        cur.execute(query)
+        result = cur.fetchone()
+        exists = str(result)
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error fetching data from PostgreSQL table", error)
+        exists = "no"
+
+    con.commit()
+    cur.close()
+    print(table, exists)
+
+    return exists
+
 
 def sql_in(con, sql_statement):
     """
@@ -76,9 +97,6 @@ def df_inserts(con, df, table):
             cur.execute(query)
             con.commit()
 
-    print("df_inserts() done")
-
-
 def setup(con):
     """
     Creates the required tables in the database if they don't already exist.
@@ -92,59 +110,64 @@ def setup(con):
             print(e)
     cur.close()
 
-    # ---------------- CREATE TABLES ----------------
-    festival_area = "CREATE TABLE IF NOT EXISTS festival_area (id serial NOT NULL PRIMARY KEY, geom GEOMETRY(MultiPolygon, 4326));"
-    food_stalls = "CREATE TABLE IF NOT EXISTS food_stalls (id serial NOT NULL PRIMARY KEY, name varchar(30) NOT NULL, geom GEOMETRY(MultiPolygon, 4326), cur_staff integer NOT NULL, max_staff integer NOT NULL);"
-    food_areas = "CREATE TABLE IF NOT EXISTS food_areas (id serial NOT NULL PRIMARY KEY, avg_count integer, cur_count integer, busy_label varchar(15), geom GEOMETRY(MultiPolygon, 4326));"
-    user_location = "CREATE TABLE IF NOT EXISTS user_location (id serial NOT NULL, geom GEOMETRY(Point, 4326));"
-    performers = "CREATE TABLE IF NOT EXISTS performers (id serial NOT NULL PRIMARY KEY, name varchar(30), genre varchar(20));"
-    stages = "CREATE TABLE IF NOT EXISTS stages (id serial NOT NULL PRIMARY KEY, stage_name varchar(20), cur_staff integer, max_staff integer, geom GEOMETRY(Point, 4326));"
-    events = "CREATE TABLE IF NOT EXISTS events (id serial NOT NULL PRIMARY KEY, day integer, stage_id integer references stages (id) NOT NULL, performer_id integer references performers (id) NOT NULL);"
-    tent_zones = "CREATE TABLE IF NOT EXISTS tent_zones (id serial NOT NULL PRIMARY KEY, capacity integer, geom GEOMETRY(MultiPolygon, 4326));"
-    tents = "CREATE TABLE IF NOT EXISTS tents (id serial NOT NULL PRIMARY KEY, geom GEOMETRY(Point, 4326));"
+    # ---------------- CREATE TABLE STATEMENTS ----------------
+    tables = {
+        "festival_area": "CREATE TABLE IF NOT EXISTS festival_area (id serial NOT NULL PRIMARY KEY, geom GEOMETRY(MultiPolygon, 4326));",
+        "food_stalls" : "CREATE TABLE IF NOT EXISTS food_stalls (id serial NOT NULL PRIMARY KEY, name varchar(30) NOT NULL, geom GEOMETRY(MultiPolygon, 4326), cur_staff integer NOT NULL, max_staff integer NOT NULL);",
+        "food_areas" : "CREATE TABLE IF NOT EXISTS food_areas (id serial NOT NULL PRIMARY KEY, avg_count integer, cur_count integer, busy_label varchar(15), geom GEOMETRY(MultiPolygon, 4326));",
+        "user_location" : "CREATE TABLE IF NOT EXISTS user_location (id serial NOT NULL, geom GEOMETRY(Point, 4326));",
+        "performers" : "CREATE TABLE IF NOT EXISTS performers (id serial NOT NULL PRIMARY KEY, name varchar(30), genre varchar(20));",
+        "stages" : "CREATE TABLE IF NOT EXISTS stages (id serial NOT NULL PRIMARY KEY, stage_name varchar(20), cur_staff integer, max_staff integer, geom GEOMETRY(Point, 4326));",
+        "events" : "CREATE TABLE IF NOT EXISTS events (id serial NOT NULL PRIMARY KEY, day integer, stage_id integer references stages (id) NOT NULL, performer_id integer references performers (id) NOT NULL);",
+        "tent_zones" : "CREATE TABLE IF NOT EXISTS tent_zones (id serial NOT NULL PRIMARY KEY, capacity integer, geom GEOMETRY(MultiPolygon, 4326));",
+        "tents" : "CREATE TABLE IF NOT EXISTS tents (id serial NOT NULL PRIMARY KEY, geom GEOMETRY(Point, 4326));"
+    }
 
-    sql_in(con, festival_area)
-    sql_in(con, food_stalls)
-    sql_in(con, food_areas)
-    sql_in(con, user_location)
-    sql_in(con, performers)
-    sql_in(con, stages)
-    sql_in(con, events)
-    sql_in(con, tent_zones)
-    sql_in(con, tents)
+    # Get True or False if table exists
+    exist = {}
+    for key in tables:
+        exist[key] = check_exists(con, key)
+
+    # Execute Create Statements
+    for key in tables:
+            if exist[key] == "('FALSE',)":
+                # print(key, '->', tables[key])
+                sql_in(con, tables[key])
 
     # ---------------- INSERT DATA INTO TABLES ----------------
 
     # Data was created either in QGIS (the data with a geom column) or in Excel (data without geom column)
     # and stored on GitHub. Pleae note: all data is made up
-    festival_area_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/festival_area.csv"
-    food_areas_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/food_areas.csv"
-    food_stalls_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/food_stalls.csv"
-    events_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/events.csv"
-    performers_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/performers.csv"
-    stages_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/stages.csv"
-    tent_zones_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/tent_zones.csv"
-    tents_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/tents.csv"
+    links = [
+        "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/festival_area.csv",
+        "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/food_areas.csv",
+        "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/food_stalls.csv",
+        "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/performers.csv",
+        "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/stages.csv",
+        "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/events.csv",
+        "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/tent_zones.csv",
+        "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/tents.csv"
+    ]
 
-    festival_area_df = pd.read_csv(festival_area_link, header=0, index_col=None)
-    food_areas_df = pd.read_csv(food_areas_link, header=0, index_col=None)
-    food_stalls_df = pd.read_csv(food_stalls_link, header=0, index_col=None)
-    events_df = pd.read_csv(events_link, header=0, index_col=None)
-    performers_df = pd.read_csv(performers_link, header=0, index_col=None)
-    stages_df = pd.read_csv(stages_link, header=0, index_col=None)
-    tent_zones_df = pd.read_csv(tent_zones_link, header=0, index_col=None)
-    tents_df = pd.read_csv(tents_link, header=0, index_col=None)
+    dataframes = {}
+    for link in links:
+        head, tail = os.path.split(link)
+        split = tail.split('.')
+        name = str(split[0])
+        df = pd.read_csv(link, header=0, index_col=None)
+        # add new name and df to dictionary "dataframes"
+        dataframes[name] = df
 
-    df_inserts(con, festival_area_df, "festival_area")
-    df_inserts(con, food_areas_df, "food_areas")
-    df_inserts(con, food_stalls_df, "food_stalls")
-    df_inserts(con, stages_df, "stages")
-    df_inserts(con, performers_df, "performers")
-    df_inserts(con, events_df, "events")
-    df_inserts(con, tent_zones_df, "tent_zones")
-    df_inserts(con, tents_df, "tents")
+    # Insert data into database
+    for key in dataframes:
+        if exist[key] == "('FALSE',)":
+            df_inserts(con, dataframes[key], key)
 
     return
+
+def get_dataframe(link):
+    result = pd.read_csv(link, header=0, index_col=None)
+    return result
 
 def welcome():
     print("\nWelcome to this little festival in Crete. \n__________________________________________\n")
@@ -157,27 +180,40 @@ def welcome():
 
 def intro():
     time.sleep(1)
-    print("\nNice to have you here! First off, a quick introduction to the festival grounds.")
+    print("\nNice to have you here! First off, a quick introduction to the festival grounds.\nIn a few seconds a pop-up"
+          "window will appear and show you an overview of the festival.")
     print("\n__________________________________________\n")
+    time.sleep(3)
+
+    festival_area = get_dataframe("https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/festival_area.csv")
 
     # create pop-up window
     popup = tk.Tk()
     # style elements
     s = ttk.Style()
     s.theme_use('classic')
-    popup.geometry('400x150')
+    popup.geometry('800x600')
     popup.title('Crete Festival Overview')
     popup.eval('tk::PlaceWindow . center')
 
-    # pop up window content
-    L1 = tk.Label(popup, text="Username:", font=(14)).grid(row=0, column=0, padx=15, pady=15)
-    L2 = tk.Label(popup, text="Password:", font=(14)).grid(row=1, column=0, padx=5, pady=5)
+    # create map widget (code from https://github.com/TomSchimansky/TkinterMapView)
+    map_widget = TkinterMapView(popup, width=800, height=600, corner_radius=0)
+    map_widget.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    # Set coordinate position
+    map_widget.set_position(35.536128, 23.797889)
+    map_widget.set_zoom(12)
+
+    # Wait for the toplevel window to be closed
+    # popup.wait_window()
 
     popup.mainloop()
 
 
 def decide():
-    user = input("Who is using this app?\n\n\t1. Festival Staff\n\t2. Festival Visitor\n\nPlease enter the appropriate number and hit enter.")
+    user = input("Who is using this app?\n\n\t"
+                 "1. Festival Staff\n\t"
+                 "2. Festival Visitor\n\n"
+                 "Please enter the appropriate number and hit enter.")
     print("\n__________________________________________\n")
     if user == "1" or user == "1.":
         task = input("What would you like to do right now?\n\n\t"
@@ -219,11 +255,11 @@ if __name__ == '__main__':
     con = connect("localhost", "festival", "postgres", "Peribff128!")
     setup(con)
     print("DB setup complete.")
-
     con.close()
 
     if welcome() == "yes":
         intro()
+
     task = decide()
     print(f"Task number: {str(task)}")
 
