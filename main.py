@@ -41,7 +41,12 @@ def df_inserts(con, df, table):
     for i in range(rows):
         cols = ', '.join(list(df.columns))
         vals = [df.at[i,col] for col in list(df.columns)]
-        if table == "food_areas":
+        if table == "festival_area":
+            query = "INSERT INTO %s(%s) VALUES(%s, ST_GeomFromText('%s', 4326));" % (
+            table, cols, vals[0], vals[1])
+            cur.execute(query)
+            con.commit()
+        elif table == "food_areas":
             query = "INSERT INTO %s(%s) VALUES(%s, %s, %s, '%s', ST_GeomFromText('%s', 4326));" % (table, cols, vals[0], vals[1], vals[2], vals[3], vals[4])
             cur.execute(query)
             con.commit()
@@ -88,9 +93,9 @@ def setup(con):
     cur.close()
 
     # ---------------- CREATE TABLES ----------------
+    festival_area = "CREATE TABLE IF NOT EXISTS festival_area (id serial NOT NULL PRIMARY KEY, geom GEOMETRY(MultiPolygon, 4326));"
     food_stalls = "CREATE TABLE IF NOT EXISTS food_stalls (id serial NOT NULL PRIMARY KEY, name varchar(30) NOT NULL, geom GEOMETRY(MultiPolygon, 4326), cur_staff integer NOT NULL, max_staff integer NOT NULL);"
     food_areas = "CREATE TABLE IF NOT EXISTS food_areas (id serial NOT NULL PRIMARY KEY, avg_count integer, cur_count integer, busy_label varchar(15), geom GEOMETRY(MultiPolygon, 4326));"
-    # food_stalls_to_areas = "CREATE TABLE IF NOT EXISTS food_stalls_to_areas (id serial NOT NULL PRIMARY KEY, food_stall_id integer references food_stalls (id) NOT NULL, food_areas_id integer references food_areas (id) NOT NULL);"
     user_location = "CREATE TABLE IF NOT EXISTS user_location (id serial NOT NULL, geom GEOMETRY(Point, 4326));"
     performers = "CREATE TABLE IF NOT EXISTS performers (id serial NOT NULL PRIMARY KEY, name varchar(30), genre varchar(20));"
     stages = "CREATE TABLE IF NOT EXISTS stages (id serial NOT NULL PRIMARY KEY, stage_name varchar(20), cur_staff integer, max_staff integer, geom GEOMETRY(Point, 4326));"
@@ -98,9 +103,9 @@ def setup(con):
     tent_zones = "CREATE TABLE IF NOT EXISTS tent_zones (id serial NOT NULL PRIMARY KEY, capacity integer, geom GEOMETRY(MultiPolygon, 4326));"
     tents = "CREATE TABLE IF NOT EXISTS tents (id serial NOT NULL PRIMARY KEY, geom GEOMETRY(Point, 4326));"
 
+    sql_in(con, festival_area)
     sql_in(con, food_stalls)
     sql_in(con, food_areas)
-    # sql_in(con, food_stalls_to_areas)
     sql_in(con, user_location)
     sql_in(con, performers)
     sql_in(con, stages)
@@ -112,6 +117,7 @@ def setup(con):
 
     # Data was created either in QGIS (the data with a geom column) or in Excel (data without geom column)
     # and stored on GitHub. Pleae note: all data is made up
+    festival_area_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/festival_area.csv"
     food_areas_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/food_areas.csv"
     food_stalls_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/food_stalls.csv"
     events_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/events.csv"
@@ -120,6 +126,7 @@ def setup(con):
     tent_zones_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/tent_zones.csv"
     tents_link = "https://raw.githubusercontent.com/Christina1281995/spatial_db_finalproject/main/data/tents.csv"
 
+    festival_area_df = pd.read_csv(festival_area_link, header=0, index_col=None)
     food_areas_df = pd.read_csv(food_areas_link, header=0, index_col=None)
     food_stalls_df = pd.read_csv(food_stalls_link, header=0, index_col=None)
     events_df = pd.read_csv(events_link, header=0, index_col=None)
@@ -128,6 +135,7 @@ def setup(con):
     tent_zones_df = pd.read_csv(tent_zones_link, header=0, index_col=None)
     tents_df = pd.read_csv(tents_link, header=0, index_col=None)
 
+    df_inserts(con, festival_area_df, "festival_area")
     df_inserts(con, food_areas_df, "food_areas")
     df_inserts(con, food_stalls_df, "food_stalls")
     df_inserts(con, stages_df, "stages")
@@ -173,17 +181,30 @@ def decide():
     print("\n__________________________________________\n")
     if user == "1" or user == "1.":
         task = input("What would you like to do right now?\n\n\t"
+                     "---- FOOD ----\n\t"
                      "1. Find out if more members of staff are needed at any food stalls.\n\t"
                      "2. Update the number of staff members at a food stall.\n\t"
-                     "3. Update the number of visitors in a food area.\n\n"
+                     "3. Update the number of visitors in a food area.\n\n\t"
+                     "---- EVENTS ----\n\t"
+                     "4. Find out if more staff is needed at a stage for an event today.\n\t"
+                     "5. Update the number of staff members at a stage.\n\n"
                      "Please enter the appropriate number and hit enter.")
         print("\n__________________________________________\n")
         return task
     elif user == "2" or user == "2.":
         task = input("What would you like to do right now?\n\n\t"
-                     "4. Find out which food areas are not busy.\n\t"
-                     "5. Find the closest food area.\n\t"
-                     "6. Find the closest not busy food area.\n\n"
+                     "---- FOOD ----\n\t"
+                     "6. Find out which food areas are not busy.\n\t"
+                     "7. Find the closest food area.\n\t"
+                     "8. Find the closest not busy food area.\n\n\t"
+                     "---- EVENTS ----\n\t"
+                     "9. Find out which events are on today.\n\t"
+                     "10. Find out when and where my favourite artist is playing.\n\t"
+                     "11. Find out what events are happening near me today.\n\t"
+                     "12. Find the closest stage.\n\n\t"
+                     "---- TENTS ----\n\t"
+                     "13. In which zone can I put my tent? I.e. where is still space?\n\t"
+                     "14. How far am I from my tent?\n\n"
                      "Please enter the appropriate number and hit enter.")
         print("\n__________________________________________\n")
         return task
