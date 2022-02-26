@@ -36,12 +36,41 @@ def sql_in(con, sql_statement):
 
 def df_inserts(con, df, table):
     cur = con.cursor()
-    for i in df.index:
-        cols = ','.join(list(df.columns))
+    columns = len(df.columns)
+    rows = len(df)
+    for i in range(rows):
+        cols = ', '.join(list(df.columns))
         vals = [df.at[i,col] for col in list(df.columns)]
-        query = "INSERT INTO %s(%s) VALUES(%s,'%s','%s')" % (table, cols, vals[0], vals[1], vals[2])
-        print(str(query))
-        cur.execute(query)
+        if table == "food_areas":
+            query = "INSERT INTO %s(%s) VALUES(%s, %s, %s, '%s', ST_GeomFromText('%s', 4326));" % (table, cols, vals[0], vals[1], vals[2], vals[3], vals[4])
+            cur.execute(query)
+            con.commit()
+        elif table == "food_stalls":
+            query = "INSERT INTO %s(%s) VALUES(%s,'%s', ST_GeomFromText('%s', 4326), %s, %s);" % (table, cols, vals[0], vals[1], vals[2], vals[3], vals[4])
+            cur.execute(query)
+            con.commit()
+        elif table == "events":
+            query = "INSERT INTO %s(%s) VALUES(%s, %s, %s, %s);" % (table, cols, vals[0], vals[1], vals[2], vals[3])
+            cur.execute(query)
+            con.commit()
+        elif table == "performers":
+            query = "INSERT INTO %s(%s) VALUES(%s,'%s','%s');" % (table, cols, vals[0], vals[1], vals[2])
+            cur.execute(query)
+            con.commit()
+        elif table == "stages":
+            query = "INSERT INTO %s(%s) VALUES(%s, '%s', %s, %s, ST_GeomFromText('%s', 4326));" % (
+            table, cols, vals[0], vals[1], vals[2], vals[3], vals[4])
+            cur.execute(query)
+            con.commit()
+        elif table == "tent_zones":
+            query = "INSERT INTO %s(%s) VALUES(%s, %s, ST_GeomFromText('%s', 4326));" % (table, cols, vals[0], vals[1], vals[2])
+            cur.execute(query)
+            con.commit()
+        elif table == "tents":
+            query = "INSERT INTO %s(%s) VALUES(%s, ST_GeomFromText('%s', 4326));" % (table, cols, vals[0], vals[1])
+            cur.execute(query)
+            con.commit()
+
     print("df_inserts() done")
 
 
@@ -59,19 +88,19 @@ def setup(con):
     cur.close()
 
     # ---------------- CREATE TABLES ----------------
-    food_stalls = "CREATE TABLE IF NOT EXISTS food_stalls (id serial NOT NULL PRIMARY KEY, name varchar(30) NOT NULL, geom GEOMETRY(Point, 4326), current_staff integer NOT NULL, maximum_staff integer NOT NULL);"
-    food_areas = "CREATE TABLE IF NOT EXISTS food_areas (id serial NOT NULL PRIMARY KEY, geom GEOMETRY(Polygon, 4326), current_count integer, average_count integer, busy_label varchar(15));"
-    food_stalls_to_areas = "CREATE TABLE IF NOT EXISTS food_stalls_to_areas (id serial NOT NULL PRIMARY KEY, food_stall_id integer references food_stalls (id) NOT NULL, food_areas_id integer references food_areas (id) NOT NULL);"
+    food_stalls = "CREATE TABLE IF NOT EXISTS food_stalls (id serial NOT NULL PRIMARY KEY, name varchar(30) NOT NULL, geom GEOMETRY(MultiPolygon, 4326), cur_staff integer NOT NULL, max_staff integer NOT NULL);"
+    food_areas = "CREATE TABLE IF NOT EXISTS food_areas (id serial NOT NULL PRIMARY KEY, avg_count integer, cur_count integer, busy_label varchar(15), geom GEOMETRY(MultiPolygon, 4326));"
+    # food_stalls_to_areas = "CREATE TABLE IF NOT EXISTS food_stalls_to_areas (id serial NOT NULL PRIMARY KEY, food_stall_id integer references food_stalls (id) NOT NULL, food_areas_id integer references food_areas (id) NOT NULL);"
     user_location = "CREATE TABLE IF NOT EXISTS user_location (id serial NOT NULL, geom GEOMETRY(Point, 4326));"
     performers = "CREATE TABLE IF NOT EXISTS performers (id serial NOT NULL PRIMARY KEY, name varchar(30), genre varchar(20));"
-    stages = "CREATE TABLE IF NOT EXISTS stages (id serial NOT NULL PRIMARY KEY, geom GEOMETRY(Point, 4326), stage_name varchar(20), current_staff integer, maximum_staff integer);"
+    stages = "CREATE TABLE IF NOT EXISTS stages (id serial NOT NULL PRIMARY KEY, stage_name varchar(20), cur_staff integer, max_staff integer, geom GEOMETRY(Point, 4326));"
     events = "CREATE TABLE IF NOT EXISTS events (id serial NOT NULL PRIMARY KEY, day integer, stage_id integer references stages (id) NOT NULL, performer_id integer references performers (id) NOT NULL);"
-    tent_zones = "CREATE TABLE IF NOT EXISTS tent_zones (id serial NOT NULL PRIMARY KEY, capacity integer, geom GEOMETRY(Polygon, 4326));"
+    tent_zones = "CREATE TABLE IF NOT EXISTS tent_zones (id serial NOT NULL PRIMARY KEY, capacity integer, geom GEOMETRY(MultiPolygon, 4326));"
     tents = "CREATE TABLE IF NOT EXISTS tents (id serial NOT NULL PRIMARY KEY, geom GEOMETRY(Point, 4326));"
 
     sql_in(con, food_stalls)
     sql_in(con, food_areas)
-    sql_in(con, food_stalls_to_areas)
+    # sql_in(con, food_stalls_to_areas)
     sql_in(con, user_location)
     sql_in(con, performers)
     sql_in(con, stages)
@@ -99,11 +128,13 @@ def setup(con):
     tent_zones_df = pd.read_csv(tent_zones_link, header=0, index_col=None)
     tents_df = pd.read_csv(tents_link, header=0, index_col=None)
 
+    df_inserts(con, food_areas_df, "food_areas")
+    df_inserts(con, food_stalls_df, "food_stalls")
+    df_inserts(con, stages_df, "stages")
     df_inserts(con, performers_df, "performers")
-
-
-    # print(events_df)
-    # df.iloc[6, 0] == 6th row 0th column
+    df_inserts(con, events_df, "events")
+    df_inserts(con, tent_zones_df, "tent_zones")
+    df_inserts(con, tents_df, "tents")
 
     return
 
@@ -168,6 +199,8 @@ if __name__ == '__main__':
     setup(con)
     print("DB setup complete.")
 
+    con.close()
+
     if welcome() == "yes":
         intro()
     task = decide()
@@ -191,4 +224,3 @@ if __name__ == '__main__':
 
     """
     # Close the connection to the db
-    con.close()
