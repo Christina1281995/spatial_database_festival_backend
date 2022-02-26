@@ -1,0 +1,6 @@
+id,stage_name,cur_staff,max_staff,geom
+"1",Summer Stage,"8","30",Point (23.66940043 35.49462787)
+"2",Seaside Stage,"10","25",Point (23.67445008 35.49866897)
+"3",Main Stage,"8","45",Point (23.67938497 35.49565568)
+"4",Ocean Stage,"8","25",Point (23.68242624 35.49965001)
+"5",Tides Stage,"8","30",Point (23.6871029 35.4967302)
