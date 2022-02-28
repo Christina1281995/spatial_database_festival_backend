@@ -1,4 +1,4 @@
-# spatial_db_finalproject
+# Spatial Databases Final Project
 
 ![image](https://user-images.githubusercontent.com/81073205/155909251-c90c006d-07b3-4215-adf6-3a0009892ae0.png)
 
