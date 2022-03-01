@@ -10,7 +10,7 @@ import functions
 if __name__ == '__main__':
 
     # Connect to DB
-    con = functions.connect("localhost", "festival", "postgres", "Peribff128!")
+    con = functions.connect("localhost", "festival", "postgres", "xxxxx")
     # Check for PostGIS extension, check if tables exist -> if not then set up tables and add data from GitHub
     functions.setup(con)
 
