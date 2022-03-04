@@ -16,11 +16,14 @@ events etc
 
 ### Psycopg2
 
-To create dynamic queries into a spatial database, there must be some form of user interaction. At the outset of this project I had no previous experience with any other postgres interaction points other than PG admin and QGIS. Both of those are direct communication channels with the database, where SQL statements are directly entered. In order **to mediate, narrate, control and guide a user around the data that is in such a spatial database, there must be an additional step in between the database (or PG admin) and the user**. The user should not need to worry about the queries and data flow to and from the database. Likewise, there should be minimal risk of the user damaging the data or inserting erroneous data. For all of those reasons, I searched the internet for an adequate "in-between" tool, and found [psycopg2](https://pypi.org/project/psycopg2/).
+To create dynamic queries into a spatial database, there must be some form of user interaction. At the outset of this project I had no previous experience with any other postgres interaction points other than PG admin and QGIS. Both of those are direct communication channels with the database, where SQL statements are directly entered. In order **to mediate, narrate, control and guide a user around the data that is in such a spatial database, there must be an additional step in between the database (or PG admin) and the user**. The user should not need to worry about the queries and data flow to and from the database. Likewise, there should be minimal risk of the user damaging the data or inserting erroneous data. For all of those reasons, I searched the internet for an adequate "in-between" tool, and found [psycopg2](https://pypi.org/project/psycopg2/). It is the main database connector for the python language. By making use of it, I was able to work with both the user and the data. The finished programme consists of 3 python files: 
+1. The "main.py" file which only contains the execution logic for the programme. It calls the relevant functions. 
+2. The "functions.py" file contains all the functionalities needed to set up the database and execute the queries according to the user input. It also includes the function for a [tkinter](https://docs.python.org/3/library/tkinter.html) pop-up window with a map showing some relevant spatial information of the query.
+3. The "locations.py" file containing some spatial information in the format that tkinter requires it for the map (which is a very different format than the geom datatypes available with postgres). If the geometry could have been converted from the database tables' geom columns I would rather have done that, but I couldn't quite work out how to reformat it so much in an automated way.
 
 ### Data Model
 
-A first concept for the database was created through simple brainstorming on the topic of "what would be a good use for an app during a festival?" and "what would I use an app for at a festival?". Based on those notes, a few key entities were identified: tents, tent areas, stages, performers, events, food stalls, food areas. With those entities in mind a set of concrete questions was developed which queries into the database should answer. With those entities and the questions / plain-text queries in mind, a data model was sketched (see image below). This data model is intentionally kept simple. It is **only as complex as it needs to be for the intended queries. As such, it is "fit for purpose"**.
+A first concept for the database was created through simple brainstorming on the topic of "what would be a good use for an app during a festival?" and "what would I use an app for at a festival?". Based on those notes, a few key entities were identified: tents, tent areas, stages, performers, events, food stalls, food areas. With those entities in mind a set of concrete questions was developed which queries into the database should answer. With those entities and the questions / plain-text queries in mind, a data model was sketched (see image below). This data model is intentionally kept simple. It is **only as complex as it needs to be for the intended queries. As such, it is "fit for purpose"**. The decisions for the cardinalities are, of course, debatable. They were determined by my own decision: e.g. that a performer only belongs to one stage and one event. 
 
 <br>
 
@@ -30,20 +33,24 @@ A first concept for the database was created through simple brainstorming on the
 
 <!-- ![Spatial Databases FinPro](https://user-images.githubusercontent.com/81073205/156794208-011a611f-f3fd-44e6-9709-86fbb86c5280.png) -->
 
+### Setting up the Database, the Tables, and the Data
+
+The only set conducted in PG admin was to create a database with the name "festival". The remainder of the set up is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files stored online in this GitHub repository. Since the list of functions is 
+
 
 ### User Interaction
 
-Although not required, a central element for this project is the uesr interaction. 
+Although not required, a central element for this project is the user interaction. In the following section I detail the logic of the available queries.
 The tables below show the different interactions available to the user. Please note that the user's input is represented in the queries through the "%s" symbol. In later stages of this project, the SQL commands were re-written into preprared statements as plans. The queries shown here still display the structure of the queries.
 
-**"Who is using this app?"**
+**Decision 1 - "Who is using this app?"**
 
 | Option | Value | 
 | :-------------: | :------------- |
 | 1 | Festival Staff |
 | 2 | Festival Visitor |
 
-**FOR STAFF: "What would you like to do right now?"**
+**Decision 2 - FOR STAFF: "What would you like to do right now?"**
 
 | Option | Value | Query |
 | :-------------: | ------------- | ---------- |
@@ -53,7 +60,7 @@ The tables below show the different interactions available to the user. Please n
 | 4 | Find out if more staff is needed at a stage for an event today | ![image-removebg-preview](https://user-images.githubusercontent.com/81073205/156790539-3f17d5a9-9db5-4001-a34f-f262b2845c6b.png) | 
 | 5 | Update the number of staff members at a stage | ![image](https://user-images.githubusercontent.com/81073205/156790300-18de63ea-d46e-4c69-b0ec-5363a1c698a2.png) |
 
-**FOR VISITORS: "What would you like to do right now?"**
+**Decision 2 - FOR VISITORS: "What would you like to do right now?"**
 
 | Option | Value | Query |
 | :-------------: | ------------- | ------------- |
