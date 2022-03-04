@@ -1,5 +1,17 @@
-# Spatial Databases Final Project
+![image](https://user-images.githubusercontent.com/81073205/156821923-c4a8fb6d-865e-4b39-a24d-debdafb7e53e.png)
 
+# A Spatial Database as the Backend for a Festival App
+
+### Context
+
+The initial motivation for this project was the final project of a 'Spatial Databses' course at the University of Salzburg. The aim is to create a spatial database that can serve as the backend to a festival, specifically it should:
+- Serve as database backend to organise the booths, roller coasters, tents etc.
+(Positions, opening times, ...) as well as other facilities (garbage bins, toilets
+etc)
+- User-specific, dynamic queries that return which events take place or facilities
+that are close to the current visitor’s position.
+- User-specific and dynamic queries about the festival (digital maps, lists of
+events etc
 
 ... in progress ...
 
