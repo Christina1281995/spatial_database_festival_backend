@@ -38,8 +38,10 @@
 | 13 | In which zone can I put my tent? I.e. where is still space? |
 | 14 | How far am I from my tent? |
 
-![image](https://user-images.githubusercontent.com/81073205/156782621-e6131e92-a8eb-4aed-b924-5e257babe98e.png)
 
+
+
+![tasks](https://user-images.githubusercontent.com/81073205/156784541-4299532d-17b7-4666-b135-bdecc873e146.png)
 
 ### Map
 
