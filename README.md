@@ -7,6 +7,8 @@
 
 ## User Interaction: 
 
+The tables below show the different interactions available to the user. Please note that the user's input is represented in the queries through the "%s" symbol. In later stages of this project, the SQL commands were re-written into preprared statements as plans. The queries shown here still display the structure of the queries.
+
 **"Who is using this app?"**
 
 | Option | Value | 
