@@ -2,6 +2,10 @@
 
 # A Spatial Database as the Backend for a Festival App
 
+### To run this program
+
+Simply create a database called 'festival' in postgres. Then download the three python files in '[src](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/src)' (if required, install any python modules) and run main.py.
+
 ### Context
 
 The initial motivation for this project was the final project of a 'Spatial Databses' course at the University of Salzburg. The aim is to create a spatial database that can serve as the backend to a festival, specifically it should:
