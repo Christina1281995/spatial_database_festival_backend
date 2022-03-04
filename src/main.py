@@ -10,7 +10,7 @@ import functions
 if __name__ == '__main__':
 
     # Connect to DB
-    con = functions.connect("localhost", "festival", "postgres", "xxxxx")
+    con = functions.connect("localhost", "festival", "postgres", "xxxxxxx")
     # Check for PostGIS extension, check if tables exist -> if not then set up tables and add data from GitHub
     functions.setup(con)
 
@@ -31,6 +31,9 @@ if __name__ == '__main__':
         add_user_pos = "INSERT INTO user_location(id, geom) VALUES(1, ST_GeomFromText('Point(%s %s)', 4326));" % (userX, userY)
         functions.sql_in(con, add_user_pos)
 
+    # Prepare plans in database
+    functions.prepare_plans(con)
+
     # Perform queries, updates, etc. according the given task number and with all necessary user input
     map, args = functions.perform_task(con, task)
 
@@ -42,3 +45,5 @@ if __name__ == '__main__':
     if map == True:
         time.sleep(2)
         functions.map(userY, userX, args)
+
+
