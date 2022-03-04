@@ -79,9 +79,9 @@ The tables below show the different interactions available to the user. Please n
 
 
 
-### Map
+### Additional Output: A Map
 
-The tkinter map pop-up window is a very simple spatial visualisation of the query. Here are some examples:
+The tkinter map pop-up window is a very simple spatial visualisation of the query. Since this project isn't programmed in a Jupyter Notebook so there are limited options for displaying a map. Here are some examples:
 
 An output of task 12 ("Find the closest stage"):
 
