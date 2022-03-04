@@ -20,6 +20,7 @@ To create dynamic queries into a spatial database, there must be some form of us
 1. The "main.py" file which only contains the execution logic for the programme. It calls the relevant functions. 
 2. The "functions.py" file contains all the functionalities needed to set up the database and execute the queries according to the user input. It also includes the function for a [tkinter](https://docs.python.org/3/library/tkinter.html) pop-up window with a map showing some relevant spatial information of the query.
 3. The "locations.py" file containing some spatial information in the format that tkinter requires it for the map (which is a very different format than the geom datatypes available with postgres). If the geometry could have been converted from the database tables' geom columns I would rather have done that, but I couldn't quite work out how to reformat it so much in an automated way.
+All three code files are saved [here](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/src) in the GitHub repository.
 
 ### Data Model
 
@@ -35,7 +36,7 @@ A first concept for the database was created through simple brainstorming on the
 
 ### Setting up the Database, the Tables, and the Data
 
-The only set conducted in PG admin was to create a database with the name "festival". The remainder of the set up is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files stored online in this GitHub repository. Since the list of functions is 
+The only set conducted in PG admin was to create a database with the name "festival". The remainder of the set up is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files stored online in this GitHub repository. Since the list of functions is quite long, it is placed at the bottom of this README page. Please refer to it for details on the functions. 
 
 
 ### User Interaction
