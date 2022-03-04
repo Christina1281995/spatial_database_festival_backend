@@ -13,14 +13,12 @@ that are close to the current visitor’s position.
 - User-specific and dynamic queries about the festival (digital maps, lists of
 events etc
 
-... in progress ...
 
-
-In this documentation a few key considerations will be discussed:
-1. The use of psycopg2 
-2. Thought processes for designing the user interaction and SQL queries
+### Psycopg2
 
 To create dynamic queries into a spatial database, there must be some form of user interaction. At the outset of this project I had no previous experience with any other postgres interaction points other than PG admin and QGIS. Both of those are direct communication channels with the database, where SQL statements are directly entered. In order **to mediate, narrate, control and guide a user around the data that is in such a spatial database, there must be an additional step in between the database (or PG admin) and the user**. The user should not need to worry about the queries and data flow to and from the database. Likewise, there should be minimal risk of the user damaging the data or inserting erroneous data. For all of those reasons, I searched the internet for an adequate "in-between" tool, and found [psycopg2](https://pypi.org/project/psycopg2/).
+
+### Data Model
 
 A first concept for the database was created through simple brainstorming on the topic of "what would be a good use for an app during a festival?" and "what would I use an app for at a festival?". Based on those notes, a few key entities were identified: tents, tent areas, stages, performers, events, food stalls, food areas. With those entities in mind a set of concrete questions was developed which queries into the database should answer. With those entities and the questions / plain-text queries in mind, a data model was sketched (see image below). This data model is intentionally kept simple. It is **only as complex as it needs to be for the intended queries. As such, it is "fit for purpose"**.
 
@@ -33,8 +31,9 @@ A first concept for the database was created through simple brainstorming on the
 <!-- ![Spatial Databases FinPro](https://user-images.githubusercontent.com/81073205/156794208-011a611f-f3fd-44e6-9709-86fbb86c5280.png) -->
 
 
-## User Interaction: 
+### User Interaction
 
+Although not required, a central element for this project is the uesr interaction. 
 The tables below show the different interactions available to the user. Please note that the user's input is represented in the queries through the "%s" symbol. In later stages of this project, the SQL commands were re-written into preprared statements as plans. The queries shown here still display the structure of the queries.
 
 **"Who is using this app?"**
