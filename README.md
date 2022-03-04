@@ -56,7 +56,21 @@
 
 ### Map
 
-The tkinter map pop-up window is a very simple spatial visualisation of the query. The image below shows an example output of task 12 ("Find the closest stage"). 
+The tkinter map pop-up window is a very simple spatial visualisation of the query. Here are some examples:
+
+An output of task 12 ("Find the closest stage"):
 
 <img src="https://user-images.githubusercontent.com/81073205/156769144-5f461047-2312-4183-9e23-0a441d805b92.png" width="75%">
+
+An output of task 1 ("Find out if more staff are needed at any food stalls"):
+
+<img src="https://user-images.githubusercontent.com/81073205/156769713-edbec7bc-5a10-4547-9bdb-fbe51dd9a05c.png" width="75%">
+
+Again an output of task 1, but after executing task 2 to upate the current staff of "Brunch Bites":
+
+<img src="https://user-images.githubusercontent.com/81073205/156772000-d8d6d92c-0f86-43df-a5e7-8f21dad1e2ca.png" width="75%">
+
+
+
+
 
