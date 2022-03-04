@@ -36,7 +36,7 @@ A first concept for the database was created through simple brainstorming on the
 
 ### Setting up the Database, the Tables, and the Data
 
-The only set conducted in PG admin was to create a database with the name "festival". The remainder of the set up is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files stored online in this GitHub repository. Since the list of functions is quite long, it is placed at the bottom of this README page. Please refer to it for details on the functions. 
+The only set conducted in PG admin was to create a database with the name "festival". The remainder of the set up is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files stored online in this GitHub repository. Since there are quite a few functions, a summarized list for reference is placed at the bottom of this README page. Please also refer to the functions.py file itself.
 
 
 ### User Interaction
