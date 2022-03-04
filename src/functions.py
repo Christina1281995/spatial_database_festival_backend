@@ -113,7 +113,7 @@ def setup(con):
     # ---------------- POSTGIS EXTENSION ----------------
     try:
         cur = con.cursor()
-        cur.execute('CREATE EXTENSION postgis;')
+        cur.execute('CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;')
     except Exception as e:
         print(e)
     cur.close()
