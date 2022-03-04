@@ -7,7 +7,6 @@ import pandas as pd
 import os
 import locations
 
-
 # ------------------------------------------------ DATA AND DB -------------------------------------------------------
 
 def connect(host, database, user, password):
@@ -21,7 +20,6 @@ def connect(host, database, user, password):
     except:
         print(f"Unable to connect to the database.")
     return con
-
 
 def check_exists(con, table):
     """Check if a table already exists. Returns TRUE or FALSE."""
@@ -38,7 +36,6 @@ def check_exists(con, table):
     cur.close()
     return exists
 
-
 def sql_in(con, sql_statement):
     """Tries to execute a statement without any return in the database. Catches errors if something goes wrong. """
     cur = con.cursor()
@@ -50,7 +47,6 @@ def sql_in(con, sql_statement):
         print("Error: %s" % error)
     cur.close()
     return
-
 
 def sql_return(con, sql_statement):
     """ Tries to execute a statement in the database with a return value. """
@@ -64,7 +60,6 @@ def sql_return(con, sql_statement):
         print("Error: %s" % error)
     cur.close()
     return result
-
 
 def df_inserts(con, df, table):
     """Performs iterative insert statement into the databsae with given dataframes to set up the tables with existing data."""
@@ -111,7 +106,7 @@ def df_inserts(con, df, table):
             query = "INSERT INTO %s(%s) VALUES(%s, ST_GeomFromText('%s', 4326));" % (table, cols, vals[0], vals[1])
             cur.execute(query)
             con.commit()
-
+    return
 
 def setup(con):
     """ Creates the required tables in the database if they don't already exist. Checks if PostGIS extension is created. Loads dataframes and inserts them via the df_inserts() function."""
@@ -177,12 +172,51 @@ def setup(con):
             df_inserts(con, dataframes[key], key)
     return
 
-
 def get_dataframe(link):
     """From link to online CSV to dataframe."""
     result = pd.read_csv(link, header=0, index_col=None)
     return result
 
+def prepare_plans(con):
+    cur = con.cursor()
+
+    # Task 1 doesn't need a plan (it's only select)
+    # Task 2
+    cur.execute("prepare plan2_2 as "
+                "SELECT name, cur_staff, max_staff FROM food_stalls WHERE id = $1;")
+    cur.execute("prepare plan2_3 as "
+                "UPDATE food_stalls SET cur_staff = $1 WHERE id = $2;")
+    # Task 3
+    cur.execute("prepare plan3_2 as "
+                "UPDATE food_areas SET cur_count = $1 WHERE id = $2;")
+    cur.execute("prepare plan3_3 as "
+                "UPDATE food_areas SET busy_label = CASE WHEN cur_count - avg_count > 5 THEN 'high' WHEN avg_count - cur_count > 5 THEN 'low' ELSE 'average' END WHERE id = $1;")
+    cur.execute("prepare plan3_4 as "
+                "SELECT busy_label FROM food_areas WHERE id = $1;")
+    # Task 4
+    cur.execute("prepare plan4 as "
+        "SELECT events.id, performers.name, stages.stage_name, stages.max_staff - stages.cur_staff, stages.max_staff FROM events INNER JOIN performers ON performers.id = events.performer_id INNER JOIN stages ON stages.id = events.stage_id WHERE day = $1 AND stages.max_staff - stages.cur_staff > 0;")
+    # Task 5
+    cur.execute("prepare plan5_2 as "
+                "UPDATE stages SET cur_staff = $1 WHERE id = $2;")
+    cur.execute("prepare plan5_3 as "
+                "SELECT stage_name FROM stages WHERE id = $1;")
+    # Task 6 doesn't need a plan (it's only select)
+    # Task 7 doesn't need a plan (it's only select)
+    # Task 8 doesn't need a plan (it's only select)
+    # Task 9
+    cur.execute("prepare plan9 as "
+                "SELECT events.id, performers.name, stages.stage_name FROM events INNER JOIN performers ON performers.id = events.performer_id INNER JOIN stages ON stages.id = events.stage_id WHERE day = $1;")
+    # Task 10
+    cur.execute("prepare plan10 as "
+        "SELECT events.day, stages.stage_name, performers.name FROM events INNER JOIN performers ON performers.id = events.performer_id INNER JOIN stages ON stages.id = events.stage_id WHERE performers.id = $1;")
+    # Task 12 doesn't need a plan (it's only select)
+    # Task 13 doesn't need a plan (it's only select)
+    # Task 14
+    cur.execute("prepare plan14 as "
+                "SELECT (ST_Distance(t.geom::geography, u.geom::geography)::integer) AS distance FROM (SELECT geom, id FROM tents WHERE ID = $1) AS t, user_location AS u ORDER BY distance ASC LIMIT 1;")
+
+    return
 
 def perform_task(con, task):
     """ Handles the chosen task logic. """
@@ -199,6 +233,7 @@ def perform_task(con, task):
         not_max_staff_average_busy = "SELECT name, max_staff - cur_staff FROM food_stalls WHERE id IN (SELECT id FROM food_stalls WHERE cur_staff < max_staff) AND id IN (SELECT s.id FROM food_stalls AS s, (SELECT geom FROM food_areas WHERE busy_label = 'average') AS a WHERE ST_Intersects(s.geom, a.geom));"
         cur.execute(not_max_staff_average_busy)
         average = cur.fetchall()
+        # Inform User
         print("\nKeep An Eye On stalls that are averagely busy but whose team is not at full capactiy:\n")
         for stall in average:
             print(f"- {str(stall[0])}: Send {str(stall[1])} more staff to reach maximum staffing.")
@@ -206,6 +241,7 @@ def perform_task(con, task):
         not_max_staff_high_busy = "SELECT name, max_staff - cur_staff FROM food_stalls WHERE id IN (SELECT id FROM food_stalls WHERE cur_staff < max_staff) AND id IN (SELECT s.id FROM food_stalls AS s, (SELECT geom FROM food_areas WHERE busy_label = 'high') AS a WHERE ST_Intersects(s.geom, a.geom));"
         cur.execute(not_max_staff_high_busy)
         busy = cur.fetchall()
+        # Inform User
         print("\nMore Staff are definitely needed: \n(Thesee stalls are very busy right now and their team is not at full capacity)\n")
         for stall in busy:
             print(f"- {str(stall[0])}: {str(stall[1])} more staff to reach maximum staffing.")
@@ -216,6 +252,7 @@ def perform_task(con, task):
     if task == "2" or task == "2.":
         # Update the number of staff members at a food stall
         print("Food Stalls: \n")
+        # 2.1.
         cur.execute("SELECT id, name, cur_staff FROM food_stalls ORDER BY id ASC;")
         stalls = cur.fetchall()
         print("ID | Stall Name | Current Staff")
@@ -223,16 +260,24 @@ def perform_task(con, task):
             print(f"{str(row[0])} | {str(row[1])} | {str(row[2])}")
         id = input(
             "\nFor which food stall do you want to update the numbers of staff? Enter the relevant id and hit enter.")
-        cur.execute("SELECT name, cur_staff, max_staff FROM food_stalls WHERE id = %s;" % (id))
-        name = cur.fetchone()
-        new_count = input(f"\n{str(name[0])} currently has {str(name[1])} staff members. The maximum is {str(name[2])}. What is the new staff count: ")
-        sql_in(con, "UPDATE food_stalls SET cur_staff = %s WHERE id = %s;" % (new_count, id))
-        args[str(name[0])] = f"{str(name[0])} staff: {str(new_count)}"
-        map = True
+        # Check input
+        if int(id) in range(1,19):
+            # 2.2.
+            cur.execute("execute plan2_2 (%s)" % (id))
+            name = cur.fetchone()
+            new_count = input(f"\n{str(name[0])} currently has {str(name[1])} staff members. The maximum is {str(name[2])}. What is the new staff count: ")
+            # 2.3.
+            cur.execute("execute plan2_3 (%s, %s)" % (new_count, id))
+            con.commit()
+            args[str(name[0])] = f"{str(name[0])} staff: {str(new_count)}"
+            map = True
+        else:
+            print("\nThe ID you entered doesn't match the food stalls. Please try again next time!")
 
     if task == "3" or task == "3.":
         # Update the number of visitors in a food area.
         print("Food Areas: \n")
+        # 3.1.
         cur.execute("SELECT id, cur_count, avg_count, busy_label FROM food_areas ORDER BY id ASC;")
         stalls = cur.fetchall()
         print("Area ID | Current Visitors | Average Nr of Visitors | Label")
@@ -240,27 +285,43 @@ def perform_task(con, task):
             print(f"{str(row[0])} | {str(row[1])} | {str(row[2])} | {str(row[3])}")
         id = input(
             "\nFor which area do you want to update the visitors? Enter the relevant id and hit enter.")
-        new_count = input(f"\nNew visitor count for area {str(id)}: ")
-        sql_in(con, "UPDATE food_areas SET cur_count = %s WHERE id = %s;" % (new_count, id))
-        sql_in(con,
-               "UPDATE food_areas SET busy_label = CASE WHEN cur_count - avg_count > 5 THEN 'high' WHEN avg_count - cur_count > 5 THEN 'low' ELSE 'average' END WHERE id = %s;" % id)
-        cur.execute("SELECT busy_label FROM food_areas WHERE id = %s;" % id)
-        new_label = cur.fetchone()
-        print(f"\nUpdate has been completed. The new label for the area is {str(new_label[0])}.")
+        # Check ID
+        if int(id) in range(1,16):
+            new_count = input(f"\nNew visitor count for area {str(id)}: ")
+            # Check new visitor number
+            if new_count.isdigit():
+                # 3.2.
+                cur.execute("execute plan3_2 (%s, %s)" % (new_count, id))
+                con.commit()
+                # 3.3.
+                cur.execute("execute plan3_3 (%s)" % id)
+                con.commit()
+                # 3.4.
+                cur.execute("execute plan3_4 (%s)" % id)
+                new_label = cur.fetchone()
+                print(f"\nUpdate has been completed. The new label for the area is {str(new_label[0])}.")
+            else:
+                print("\nThe value you entered is not recognised as a digit. Try again next time!")
+        else:
+            print("\nThe ID you entered does not match any food area. Please try again next time!")
 
     if task == "4" or task == "4.":
         # Find out if more staff is needed at a stage for an event today
         day = input("\nWhich day of the festival is it today? Days range from 1 - 4. Enter the day number and hit enter.")
-        cur.execute("SELECT events.id, performers.name, stages.stage_name, stages.max_staff - stages.cur_staff, stages.max_staff FROM events INNER JOIN performers ON performers.id = events.performer_id INNER JOIN stages ON stages.id = events.stage_id WHERE day = %s AND stages.max_staff - stages.cur_staff > 0;" % day)
-        result = cur.fetchall()
-        print("\nThese events are on today, which need more staff!\n\nEvent ID | Performer | Stage | Nr of Staff Needed | Current Staff")
-        for row in result:
-            print(f"{str(row[0])} | {str(row[1])} | {str(row[2])} | {str(row[3])} | {str(row[4])}")
-            args[str(row[2])] = f"{str(row[2])}. {str(row[1])} on today. \nSend {str(row[3])} more staff."
-        map = True
+        if int(day) in range(1,4):
+            cur.execute("execute plan4 (%s)" % day)
+            result = cur.fetchall()
+            print("\nThese events are on today, which need more staff!\n\nEvent ID | Performer | Stage | Nr of Staff Needed | Current Staff")
+            for row in result:
+                print(f"{str(row[0])} | {str(row[1])} | {str(row[2])} | {str(row[3])} | {str(row[4])}")
+                args[str(row[2])] = f"{str(row[2])}. {str(row[1])} on today. \nSend {str(row[3])} more staff."
+            map = True
+        else:
+            print("\nThe value you entered for 'day' wasn't recognised. Please try again next time!")
 
     if task == "5" or task == "5.":
         # Update the number of staff members at a stage.
+        # 5.1.
         cur.execute("SELECT id, stage_name, cur_staff, max_staff FROM stages ORDER BY id ASC;")
         stages = cur.fetchall()
         print("\nID | Stage Name | Current Staff | Maximum Staff")
@@ -268,8 +329,11 @@ def perform_task(con, task):
             print(f"{str(row[0])} | {str(row[1])} | {str(row[2])} | {str(row[3])}")
         id = input("\nFor which stage do you want to update the staff? Please enter the id.")
         staff = input("What is the new staff count?")
-        sql_in(con, "UPDATE stages SET cur_staff = %s WHERE id = %s;" % (staff, id))
-        cur.execute("SELECT stage_name FROM stages WHERE id = %s;" % id)
+        # 5.2.
+        cur.execute("execute plan5_2 (%s, %s)" % (staff, id))
+        con.commit()
+        # 5.3.
+        cur.execute("execute plan5_3 (%s);" % id)
         name = cur.fetchone()
         args[str(name[0])] = f"{str(name[0])} staff: {str(staff)}"
         map = True
@@ -310,7 +374,7 @@ def perform_task(con, task):
     if task == "9" or task == "9.":
         # Find out which events are on today
         day = input("\nWhich day of the festival is it today? Days range from 1 - 4. Enter the day number and hit enter.")
-        cur.execute("SELECT events.id, performers.name, stages.stage_name FROM events INNER JOIN performers ON performers.id = events.performer_id INNER JOIN stages ON stages.id = events.stage_id WHERE day = %s;" % day)
+        cur.execute("execute plan9 (%s)" % day)
         result = cur.fetchall()
         print("\nEvents on Today:")
         print("\nEvent ID | Performer | Stage ")
@@ -322,13 +386,15 @@ def perform_task(con, task):
 
     if task == "10" or task == "10.":
         # Find out when and where my favourite artist is playing
+        # 10.1.
         cur.execute("SELECT id, name, genre FROM performers ORDER BY id ASC;")
         perf = cur.fetchall()
         print("\nID | Performer | Genre")
         for act in perf:
             print(f"{str(act[0])} | {str(act[1])} | {str(act[2])}")
         id = input("\nWhich artist do you want to inquire about? Please enter their id: ")
-        cur.execute("SELECT events.day, stages.stage_name, performers.name FROM events INNER JOIN performers ON performers.id = events.performer_id INNER JOIN stages ON stages.id = events.stage_id WHERE performers.id = %s;" % id)
+        # 10.2.
+        cur.execute("execute plan10 (%s)" % id)
         result = cur.fetchone()
         print(f"\nYour favourite artist {str(result[2])} is playing on day {str(result[0])} on the {str(result[1])}! Enjoy the show!")
         args[str(result[1])] = f"{str(result[2])}: Day {str(result[0])}"
@@ -350,17 +416,36 @@ def perform_task(con, task):
         args["user"] = "Your Position"
         map = True
 
+    if task == "13" or task == "13.":
+        # In which zone can I put my tent? I.e. where is still space?
+        cur.execute("SELECT n.id, n.more_tents FROM (SELECT t.id, t.capacity - t.tent_count AS more_tents FROM (SELECT tent_zones.id, tent_zones.capacity, COUNT(tents.geom) AS tent_count FROM tent_zones LEFT JOIN tents ON ST_Contains(tent_zones.geom,tents.geom) GROUP BY tent_zones.id) AS t) AS n WHERE n.more_tents > 0;")
+        result = cur.fetchall()
+        print(f"\nThese tent zones still have capacities:")
+        for row in result:
+            print(f"Zone {str(row[0])} can still fit {str(row[1])} more tents.")
+            # args["Zone {str(row[0])}"] = f"Zone {str(row[0])}: Can fit {str(row[1])} more tents"
+        args["Festival Area"] = " "
+        map = True
 
-
+    if task == "14" or task == "14.":
+        # How far am I from my tent?
+        # 14.1.
+        cur.execute("SELECT COUNT(tents.geom) FROM tents;")
+        result = cur.fetchone()
+        tent_nr = input(f"\nThere are {str(result[0])} tents. The tent numbers therefore range from 1 - {str(result[0])}. Which is your tent number? ")
+        # 14.2.
+        cur.execute("execute plan14 (%s)" % tent_nr)
+        distance = cur.fetchone()
+        print(f"\nYour tent (Nr. {str(tent_nr)}) is {str(distance[0])} meters away from you.")
+        args["Festival Area"] = " "
+        args["user"] = "Your Position"
+        # args["Tent {str(tent_nr)}"] = "Your Tent - Nr. {str(tent_nr)}"
+        map = True
 
     cur.close()
 
     return map, args
 
-    """
-        if task == "13" or task == "13.":
-        if task == "14" or task == "14.":
-    """
 
 
 # ============================================= USER INTERACTION ======================================================
@@ -418,7 +503,6 @@ def map(userY, userX, show):
     popup.mainloop()
     return
 
-
 def decide():
     print("\nWelcome to this little festival in Crete. \n__________________________________________\n")
     user = input("Who is using this app?\n\n\t"
@@ -426,6 +510,7 @@ def decide():
                  "2. Festival Visitor\n\n"
                  "Please enter the appropriate number and hit enter: ")
     print("\n__________________________________________\n")
+    # Check user input
     if user == "1" or user == "1.":
         task = input("What would you like to do right now?\n\n\t"
                      "---- FOOD ----\n\t"
@@ -437,6 +522,12 @@ def decide():
                      "5. Update the number of staff members at a stage.\n\n"
                      "Please enter the appropriate number and hit enter: ")
         print("\n__________________________________________\n")
+        # Check entered task number
+        if int(task) in range(1,5):
+            pass
+        else:
+            print("\nThe entered task was not recognised. Please try again next time!")
+            sys.exit(0)
     elif user == "2" or user == "2.":
         task = input("What would you like to do right now?\n\n\t"
                      "---- FOOD ----\n\t"
@@ -453,6 +544,12 @@ def decide():
                      "14. How far am I from my tent?\n\n"
                      "Please enter the appropriate number and hit enter: ")
         print("\n__________________________________________\n")
+        # Check entered task number
+        if int(task) in range(6,14):
+            pass
+        else:
+            print("\nThe entered task was not recognised. Please try again next time!")
+            sys.exit(0)
     else:
         print("The entered value wasn't recognised. Please try again.")
         sys.exit(0)
