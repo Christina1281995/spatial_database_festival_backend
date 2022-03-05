@@ -40,8 +40,17 @@ A first concept for the database was created through simple brainstorming on the
 
 ### Setting up the Database, the Tables, and the Data
 
-The only step conducted in PG admin was to create a database with the name "festival". The remainder of the setup is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files [stored online in this GitHub repository](https://github.com/Christina1281995/spatial_database_festival_backend/tree/main/data). Since there are quite a few functions, a summarized list for reference is placed further towards the bottom of this README page. Please also refer to the [functions.py](https://github.com/Christina1281995/spatial_database_festival_backend/blob/main/src/functions.py) file itself.
+QGIS was used to create fictional data for the database. The tables were set up according to the data model and the geom columns were calculated using QGIS’s field calculator and the expression shown below. A screenshot of the QGIS project is also shown below. Once the data was satisfactorily created, it was exported as a CSV file and uploaded to GitHub where it could later be accessed through the python programme.
 
+![image](https://user-images.githubusercontent.com/81073205/156882814-51e79819-35a6-49c6-844c-25d9996531a7.png)
+
+The only step conducted in PG admin was to create a database with the name "festival". The remainder of the setup is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files [stored online in this GitHub repository](https://github.com/Christina1281995/spatial_database_festival_backend/tree/main/data). Since there are quite a few functions, a summarized list for reference is placed further towards the bottom of this README pagen. Please also refer to the [functions.py](https://github.com/Christina1281995/spatial_database_festival_backend/blob/main/src/functions.py) file itself.
+
+While creating the programme, PG admin was used to check that all inserts and queries work. After creating the function to download the CSV data from GitHub, to format it into a pandas DataFrame and then to insert it into the correct table, PG Admin was used to validate that the data had indeed arrived in the table in the correct format. The image to below (left) shows the events table, which contains the events’ IDs, the day of the events, and as foreign keys it also refers to the respective stage and performers. Thanks to the option of viewing the geom column directly in PG Admin, I was also easily able to validate that the geometry was created correctly (image below, right).
+
+![image](https://user-images.githubusercontent.com/81073205/156882935-68123a47-553a-4049-8545-32cfd1026fb6.png)
+
+<br>
 
 ### User Interaction
 
