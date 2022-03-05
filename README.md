@@ -105,11 +105,12 @@ First the SQL queries are prepared as part of the setup() function:
                 "SELECT stage_name FROM stages WHERE id = $1;")
 ```
 
-Then, during the perform_tasks() function the user is guided through the process and several checks are performed.
+Then, during the perform_tasks() function the user is guided through the process and several checks are performed. In this code snippet a few additional comments have been added to make the process more understandable.
 
 ```
     if task == "5" or task == "5.":
         # Task 5 -> Update the number of staff members at a stage.
+        
         # 5.1.
         # Get information to show user
         cur.execute("SELECT id, stage_name, cur_staff, max_staff FROM stages ORDER BY id ASC;")
@@ -117,32 +118,42 @@ Then, during the perform_tasks() function the user is guided through the process
         print("\nID | Stage Name | Current Staff | Maximum Staff")
         for row in stages:
             print(f"{str(row[0])} | {str(row[1])} | {str(row[2])} | {str(row[3])}")
+            
         # Get user input on which stage they want to update
         stage = input("\nFor which stage do you want to update the staff? Please enter the id.")
+        
         # Check that the stage ID is valid
         if int(stage) in range(1, 6):
+        
             # Execute plan to get the allowed maximum staff for the selected stage
             cur.execute("execute plan5_1 (%s)" % stage)
             result = cur.fetchone()
             maximum_staff = int(result[0]) + 1
+            
             # Get user input for new staff count
             staff = input("What is the new staff count? ")
+            
             # Check validity of input against the maximum allowed
             if staff.isdigit():
                 if int(staff) < maximum_staff:
+                
                     # 5.2.
                     # Execute plan to update item in database
                     cur.execute("execute plan5_2 (%s, %s)" % (staff, stage))
                     con.commit()
+                    
                     # 5.3.
                     # Execute plan to get stage name and staff for display in map
                     cur.execute("execute plan5_3 (%s);" % stage)
                     name = cur.fetchone()
+                    
                     # Set arguments for display in map
                     args[str(name[0])] = f"{str(name[0])} staff: {str(staff)}"
                     show_a_map = True
+                    
                 else:
                     print("The value you entered is larger than the maximum. Please try again next time!")
+                    
             else:
                 print("The value you entered wasn't recognised as a digit. Please try again next time!")
 ```
