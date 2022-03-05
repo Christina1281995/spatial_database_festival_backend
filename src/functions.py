@@ -9,6 +9,32 @@ import locations
 
 # ------------------------------------------------ DATA AND DB -------------------------------------------------------
 
+def connection_params():
+    print("\nWelcome to this little festival in Crete. \n__________________________________________\n\n"
+          "Let's connect you to this app.\n")
+    d1 = input("Step 1 of 4: Your host has been set to 'localhost'. Do you want to change this? Type 'y' for yes or anything else for no: ")
+    if d1 == "Y" or d1 == "y":
+        host = input("Please enter a new host and hit enter: ")
+    else:
+        host = "localhost"
+    d2 = input("\nStep 2 of 4: Your database name has been set to 'festival'. Do you want to change this? Type 'y' for yes or anything else for no: ")
+    if d2 == "Y" or d2 == "y":
+        database = input("Please enter a new host and hit enter: ")
+    else:
+        database = "festival"
+    d3 = input("\nStep 3 of 4: Your username has been set to 'postgres'. Do you want to change this? Type 'y' for yes or anything else for no: ")
+    if d3 == "Y" or d3 == "y":
+        username = input("Please enter a new username and hit enter: ")
+    else:
+        username = "postgres"
+    password = input(
+            "\nStep 4 of 4: Lastly, please enter your password and hit enter: ")
+
+    print("\n__________________________________________\n\nGreat! Let's get going!\n\n"
+          "__________________________________________\n")
+
+    return host, database, username, password
+
 def connect(host, database, user, password):
     """Connect to the db"""
     try:
@@ -464,7 +490,6 @@ def perform_task(con, task):
     return map, args
 
 
-
 # ============================================= USER INTERACTION ======================================================
 
 def map(userY, userX, show):
@@ -529,7 +554,6 @@ def map(userY, userX, show):
     return
 
 def decide():
-    print("\nWelcome to this little festival in Crete. \n__________________________________________\n")
     user = input("Who is using this app?\n\n\t"
                  "1. Festival Staff\n\t"
                  "2. Festival Visitor\n\n"
