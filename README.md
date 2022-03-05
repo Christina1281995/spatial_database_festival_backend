@@ -4,9 +4,11 @@
 
 ### To run this program
 
-1. Create a database called 'festival' in postgres.
-2. Download the three python files in '[src](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/src)' (if required, install any python modules).
-3. Run main.py (then your connection to the database and all tables and data will automatically be added and you will be guided through the queries).
+1. Create a database called 'festival' in postgres
+2. Download the three python files in the [src folder](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/src) (if required, install any python modules)
+3. Run main.py from your preferred IDE e.g. PyCharm 
+
+Running 'main.py' takes care of your connection to the database, the setup of all tables, PostGIS extension, and data.
 
 ### Context
 
