@@ -74,7 +74,7 @@ The tables below show the different interactions available to the user. Please n
 | 8 | Find the closest not busy food stall |  ![image](https://user-images.githubusercontent.com/81073205/156789624-63e4d1cd-a7f4-4f35-a3de-ad6f1fd5737e.png) |
 | 9 | Find out which events are on today | ![image-removebg-preview (2)](https://user-images.githubusercontent.com/81073205/156790940-79270d08-5500-4bf4-b985-6a109b597cd5.png) |
 | 10 | Find out when and where my favourite artist is playing | ![image](https://user-images.githubusercontent.com/81073205/156790998-e50b20b3-538c-49f4-9ca0-b922d0c19df5.png) |
-| 11 | Find out what events are happening near me today | ![image-removebg-preview (4)](https://user-images.githubusercontent.com/81073205/156873357-785c69df-ae5d-44e1-a47b-05fcfb450bf1.png) |
+| 11 | Find out what events are happening near me today | ![image-removebg-preview (5)](https://user-images.githubusercontent.com/81073205/156874105-ae5e834d-456c-4fd0-a009-c2f894237feb.png) |
 | 12 | Find the closest stage | ![image](https://user-images.githubusercontent.com/81073205/156791104-3ba5b23d-0a61-418c-a994-29954b61231a.png) |
 | 13 | In which zone can I put my tent? I.e. where is still space? | ![image-removebg-preview (3)](https://user-images.githubusercontent.com/81073205/156791211-c562a96e-3180-4b4d-baaa-1a9cbf869890.png) |
 | 14 | How far am I from my tent? | ![image](https://user-images.githubusercontent.com/81073205/156791248-58f4f706-735b-45df-883f-a6dfa8342e1f.png) |
