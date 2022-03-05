@@ -210,6 +210,9 @@ def prepare_plans(con):
     # Task 10
     cur.execute("prepare plan10 as "
         "SELECT events.day, stages.stage_name, performers.name FROM events INNER JOIN performers ON performers.id = events.performer_id INNER JOIN stages ON stages.id = events.stage_id WHERE performers.id = $1;")
+    # Task 11
+    cur.execute("prepare plan11 as "
+                "SELECT e.id, e.name, e.stage_name, (ST_Distance(e.geom::geography, u.geom::geography)::integer) AS distance FROM (SELECT events.id, performers.name, stages.stage_name, stages.geom FROM events INNER JOIN performers ON performers.id = events.performer_id INNER JOIN stages ON stages.id = events.stage_id WHERE day = $1) AS e, user_location AS u ORDER BY distance ASC;")
     # Task 12 doesn't need a plan (it's only select)
     # Task 13 doesn't need a plan (it's only select)
     # Task 14
@@ -308,7 +311,7 @@ def perform_task(con, task):
     if task == "4" or task == "4.":
         # Find out if more staff is needed at a stage for an event today
         day = input("\nWhich day of the festival is it today? Days range from 1 - 4. Enter the day number and hit enter.")
-        if int(day) in range(1,4):
+        if int(day) in range(1,5):
             cur.execute("execute plan4 (%s)" % day)
             result = cur.fetchall()
             print("\nThese events are on today, which need more staff!\n\nEvent ID | Performer | Stage | Nr of Staff Needed | Current Staff")
@@ -401,9 +404,23 @@ def perform_task(con, task):
         args["Festival Area"] = " "
         map = True
 
-    #if task == "11" or task == "11.":
+    if task == "11" or task == "11.":
         # Find out what events are happening near me today.
-        # day = input("\nWhich day of the festival is it today? Days range from 1 - 4. Enter the day number and hit enter.")
+        day = input("\nWhich day of the festival is it today? Days range from 1 - 4. Enter the day number and hit enter.")
+        if int(day) in range(1, 5):
+            cur.execute("execute plan11 (%s)" % day)
+            results = cur.fetchall()
+            print(f"\nThese events are happening today. They are ranked by their distance from you (closest to farthest):\n\n")
+            i = 1
+            for result in results:
+                print(f"\t{str(i)}. {str(result[1])} is performing at the {str(result[2])}. It's {str(result[3])} meters away from you.")
+                args[f"path{str(i)}"] = str(result[2])
+                args[str(result[2])] = f"{str(result[1])} at {str(result[2])}:\n{str(result[3])} meters away"
+                i = i + 1
+            args["user"] = "Your Position"
+            map = True
+        else:
+            print("\nThe value you entered for 'day' wasn't recognised. Please try again next time!")
 
     if task == "12" or task == "12.":
         # Find the closest stage
@@ -490,6 +507,14 @@ def map(userY, userX, show):
                                      (35.49837698770717509, 23.66898440416236582)])
             elif key == "path":
                 map_widget.set_path([(userY, userX), locations.places[show[key]]])
+            elif key == "path1":
+                map_widget.set_path([(userY, userX), locations.places[show[key]]])
+            elif key == "path2":
+                map_widget.set_path([(userY, userX), locations.places[show[key]]])
+            elif key == "path3":
+                map_widget.set_path([(userY, userX), locations.places[show[key]]])
+            elif key == "path4":
+                map_widget.set_path([(userY, userX), locations.places[show[key]]])
             elif key == "user":
                 map_widget.set_marker(userY, userX, text=f"{str(show[key])}", text_color="darkred",
                                       marker_color_circle="red", marker_color_outside="darkred",
@@ -545,7 +570,7 @@ def decide():
                      "Please enter the appropriate number and hit enter: ")
         print("\n__________________________________________\n")
         # Check entered task number
-        if int(task) in range(6,14):
+        if int(task) in range(6,15):
             pass
         else:
             print("\nThe entered task was not recognised. Please try again next time!")
