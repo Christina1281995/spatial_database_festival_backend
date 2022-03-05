@@ -57,6 +57,8 @@ The tables below show the different interactions available to the user. Please n
 | 1 | Festival Staff |
 | 2 | Festival Visitor |
 
+<br>
+
 **Decision 2 - FOR STAFF: "What would you like to do right now?"**
 
 | Option | Value | Query |
@@ -66,6 +68,8 @@ The tables below show the different interactions available to the user. Please n
 | 3 | Update the number of visitors in a food area | ![image](https://user-images.githubusercontent.com/81073205/156790595-e7688883-ebab-4599-bfb1-52ea054f676f.png) |
 | 4 | Find out if more staff is needed at a stage for an event today | ![image-removebg-preview](https://user-images.githubusercontent.com/81073205/156790539-3f17d5a9-9db5-4001-a34f-f262b2845c6b.png) | 
 | 5 | Update the number of staff members at a stage | ![image](https://user-images.githubusercontent.com/81073205/156790300-18de63ea-d46e-4c69-b0ec-5363a1c698a2.png) |
+
+<br>
 
 **Decision 2 - FOR VISITORS: "What would you like to do right now?"**
 
