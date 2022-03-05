@@ -6,8 +6,7 @@
 
 1. Create a database called 'festival' in postgres.
 2. Download the three python files in '[src](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/src)' (if required, install any python modules).
-3. Adjust your database connection
-4. Run main.py (then all tables and data will automatically be added and you will be guided through the queries).
+3. Run main.py (then your connection to the database and all tables and data will automatically be added and you will be guided through the queries).
 
 ### Context
 
