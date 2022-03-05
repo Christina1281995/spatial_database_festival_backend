@@ -98,13 +98,11 @@ An output of task 11 ("Find out which events are happening near me today"):
 
 <img src="https://user-images.githubusercontent.com/81073205/156873995-2a851bc5-2e84-4bd5-910c-302a97b68dc0.png" width="75%">
 
-An output of task 1 ("Find out if more staff are needed at any food stalls"):
+The outputs of task 4 and 5 to show how the query results change if the user updates values:
 
-<img src="https://user-images.githubusercontent.com/81073205/156769713-edbec7bc-5a10-4547-9bdb-fbe51dd9a05c.png" width="75%">
+![image](https://user-images.githubusercontent.com/81073205/156876806-a41fde4c-31fe-4e8d-a6f7-a3a1b141759e.png)
 
-Again an output of task 1, but after executing task 2 to upate the current staff of "Brunch Bites":
 
-<img src="https://user-images.githubusercontent.com/81073205/156772000-d8d6d92c-0f86-43df-a5e7-8f21dad1e2ca.png" width="75%">
 
 
 ## Functions
