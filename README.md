@@ -11,21 +11,17 @@
 ### Context
 
 The initial motivation for this project was the final project of a 'Spatial Databses' course at the University of Salzburg. The aim is to create a spatial database that can serve as the backend to a festival, specifically it should:
-- Serve as database backend to organise the booths, roller coasters, tents etc.
-(Positions, opening times, ...) as well as other facilities (garbage bins, toilets
-etc)
-- User-specific, dynamic queries that return which events take place or facilities
-that are close to the current visitor’s position.
-- User-specific and dynamic queries about the festival (digital maps, lists of
-events etc
+- Serve as database backend to organise the booths, roller coasters, tents etc. (Positions, opening times, ...) as well as other facilities (garbage bins, toilets etc)
+- User-specific, dynamic queries that return which events take place or facilities that are close to the current visitor’s position.
+- User-specific and dynamic queries about the festival (digital maps, lists of events etc)
 
 
 ### Psycopg2
 
 To create dynamic queries into a spatial database, there must be some form of user interaction. At the outset of this project I had no previous experience with any other postgres interaction points other than PG admin and QGIS. Both of those are direct communication channels with the database, where SQL statements are directly entered. In order **to mediate, narrate, control and guide a user around the data that is in such a spatial database, there must be an additional step in between the database (or PG admin) and the user**. The user should not need to worry about the queries and data flow to and from the database. Likewise, there should be minimal risk of the user damaging the data or inserting erroneous data. For all of those reasons, I searched the internet for an adequate "in-between" tool, and found [psycopg2](https://pypi.org/project/psycopg2/). It is the main database connector for the python language. By making use of it, I was able to work with both the user and the data. The finished programme consists of 3 python files: 
-1. The "main.py" file which only contains the execution logic for the programme. It calls the relevant functions. 
-2. The "functions.py" file contains all the functionalities needed to set up the database and execute the queries according to the user input. It also includes the function for a [tkinter](https://docs.python.org/3/library/tkinter.html) pop-up window with a map showing some relevant spatial information of the query.
-3. The "locations.py" file containing some spatial information in the format that tkinter requires it for the map (which is a very different format than the geom datatypes available with postgres). If the geometry could have been converted from the database tables' geom columns I would rather have done that, but I couldn't quite work out how to reformat it so much in an automated way.
+1. The **"main.py"** file which only contains the execution logic for the programme. It calls the relevant functions. 
+2. The **"functions.py"** file contains all the functionalities needed to set up the database and execute the queries according to the user input. It also includes the function for a [tkinter](https://docs.python.org/3/library/tkinter.html) pop-up window with a map showing some relevant spatial information of the query.
+3. The **"locations.py"** file containing some spatial information in the format that tkinter requires it for the map (which is a very different format than the geom datatypes available with postgres). If the geometry could have been converted from the database tables' geom columns I would rather have done that, but I couldn't quite work out how to reformat it so much in an automated way.
 All three code files are saved [here](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/src) in the GitHub repository.
 
 ### Data Model
@@ -42,15 +38,20 @@ A first concept for the database was created through simple brainstorming on the
 
 ### Setting up the Database, the Tables, and the Data
 
-The only set conducted in PG admin was to create a database with the name "festival". The remainder of the set up is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files stored online in this GitHub repository. Since there are quite a few functions, a summarized list for reference is placed at the bottom of this README page. Please also refer to the functions.py file itself.
+The only step conducted in PG admin was to create a database with the name "festival". The remainder of the setup is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files [stored online in this GitHub repository](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/data). Since there are quite a few functions, a summarized list for reference is placed at the bottom of this README page. Please also refer to the [functions.py](https://github.com/Christina1281995/spatial_db_finalproject/blob/main/src/functions.py) file itself.
 
 
 ### User Interaction
 
 Although not required, a central element for this project is the user interaction. In the following section I detail the logic of the available queries.
-The tables below show the different interactions available to the user. Please note that the user's input is represented in the queries through the "%s" symbol. In later stages of this project, the SQL commands were re-written into preprared statements as plans. The queries shown here still display the structure of the queries.
+The tables below show the different interactions available to the user. Please note that the user's input is represented in the queries through the "%s" symbol. In later stages of this project, the SQL commands were re-written into preprared statements as plans.
+
+<br>
 
 **Decision 1 - "Who is using this app?"**
+
+<br>
+
 
 | Option | Value | 
 | :-------------: | :------------- |
@@ -60,6 +61,9 @@ The tables below show the different interactions available to the user. Please n
 <br>
 
 **Decision 2 - FOR STAFF: "What would you like to do right now?"**
+
+<br>
+
 
 | Option | Value | Query |
 | :-----: | --------- | ------------- |
@@ -73,6 +77,9 @@ The tables below show the different interactions available to the user. Please n
 
 **Decision 2 - FOR VISITORS: "What would you like to do right now?"**
 
+<br>
+
+
 | Option | Value | Query |
 | :-----: | --------- | ------------- |
 | 6 | Find out which food areas are not busy | ![image](https://user-images.githubusercontent.com/81073205/156789804-cfe19241-db67-43a4-91d9-8cdc44956428.png) |
@@ -85,13 +92,17 @@ The tables below show the different interactions available to the user. Please n
 | 13 | In which zone can I put my tent? I.e. where is still space? | ![image-removebg-preview (3)](https://user-images.githubusercontent.com/81073205/156791211-c562a96e-3180-4b4d-baaa-1a9cbf869890.png) |
 | 14 | How far am I from my tent? | ![image](https://user-images.githubusercontent.com/81073205/156791248-58f4f706-735b-45df-883f-a6dfa8342e1f.png) |
 
+<br>
 
-As mentioned above, these queries are embedded in python script that performs the following:
-- executes the queries as prepared statement plans to prevent SQL injection attacks
-- Performs various validity checks on user input before sending the queries (e.g. for updates to the database the user input is checked for the correct format and whether the input is a within a valid range)
-- Guides the user through the query process through descriptions.
 
-**Here is an example of this python-SQL construct for task 5 ("Update number of staff at a stage"):**
+As already mentioned, these queries are embedded in python script. The python code is designed to perform the following:
+- **Execute the queries** as prepared statement plans to prevent SQL injection attacks
+- Performs various **validity checks** on user input before sending the queries (e.g. for updates to the database the user input is checked for the correct format and whether the input is a within a valid range)
+- **Guides the user** through the query process through descriptions.
+
+<br>
+
+### An example of the code for task 5 ("Update number of staff at a stage")
 
 First the SQL queries are prepared as part of the setup() function:
 
@@ -105,7 +116,7 @@ First the SQL queries are prepared as part of the setup() function:
                 "SELECT stage_name FROM stages WHERE id = $1;")
 ```
 
-Then, during the perform_tasks() function the user is guided through the process and several checks are performed. In this code snippet a few additional comments have been added to make the process more understandable.
+Then, the perform_tasks() function interacts with the user and performs several checks are performed. In this code snippet a few additional comments have been added to make the process more understandable.
 
 ```
     if task == "5" or task == "5.":
@@ -158,10 +169,14 @@ Then, during the perform_tasks() function the user is guided through the process
                 print("The value you entered wasn't recognised as a digit. Please try again next time!")
 ```
 
+<br>
 
-### Additional Output: A Map
 
-The tkinter map pop-up window is a very simple spatial visualisation of the query. Since this project isn't programmed in a Jupyter Notebook so there are limited options for displaying a map. Here are some examples:
+## A Map as an Additional Output
+
+The tkinter map pop-up window is a very simple spatial visualisation of the query. Since this project isn't programmed in a Jupyter Notebook or any equivalent there are limited options for displaying a map. Here are some examples:
+
+<br>
 
 An output of task 12 ("Find the closest stage"):
 
@@ -175,6 +190,7 @@ The outputs of task 4 and 5 to show how the query results change if the user upd
 
 ![image](https://user-images.githubusercontent.com/81073205/156876806-a41fde4c-31fe-4e8d-a6f7-a3a1b141759e.png)
 
+<br>
 
 
 
@@ -197,5 +213,4 @@ The outputs of task 4 and 5 to show how the query results change if the user upd
 | def **decide**() | User interaction logic to find out what task the user wants to do. This function also asks for the user's location if the chosen task requires it. If none is required the user's position is set to 0,0. | **userX** - user's x position, **userY** - user's y position, **task** - the chosen task number |
 
 
-
-
+_By Christina Zorenboehmer_
