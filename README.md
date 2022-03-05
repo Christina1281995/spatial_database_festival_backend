@@ -5,7 +5,7 @@
 ### To run this program
 
 1. Create a database called 'festival' in postgres
-2. Download the three python files in the [src folder](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/src) (if required, install any python modules)
+2. Download the three python files in the [src folder](https://github.com/Christina1281995/spatial_database_festival_backend/tree/main/src) (if required, install any python modules)
 3. Run main.py from your preferred IDE e.g. PyCharm 
 
 Running 'main.py' takes care of your connection to the database, the setup of all tables, PostGIS extension, and data.
@@ -24,7 +24,7 @@ To create dynamic queries into a spatial database, there must be some form of us
 1. The **"main.py"** file which only contains the execution logic for the programme. It calls the relevant functions. 
 2. The **"functions.py"** file contains all the functionalities needed to set up the database and execute the queries according to the user input. It also includes the function for a [tkinter](https://docs.python.org/3/library/tkinter.html) pop-up window with a map showing some relevant spatial information of the query.
 3. The **"locations.py"** file containing some spatial information in the format that tkinter requires it for the map (which is a very different format than the geom datatypes available with postgres). If the geometry could have been converted from the database tables' geom columns I would rather have done that, but I couldn't quite work out how to reformat it so much in an automated way.
-All three code files are saved [here](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/src) in the GitHub repository.
+All three code files are saved [here](https://github.com/Christina1281995/spatial_database_festival_backend/tree/main/src) in the GitHub repository.
 
 ### Data Model
 
@@ -40,7 +40,7 @@ A first concept for the database was created through simple brainstorming on the
 
 ### Setting up the Database, the Tables, and the Data
 
-The only step conducted in PG admin was to create a database with the name "festival". The remainder of the setup is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files [stored online in this GitHub repository](https://github.com/Christina1281995/spatial_db_finalproject/tree/main/data). Since there are quite a few functions, a summarized list for reference is placed at the bottom of this README page. Please also refer to the [functions.py](https://github.com/Christina1281995/spatial_db_finalproject/blob/main/src/functions.py) file itself.
+The only step conducted in PG admin was to create a database with the name "festival". The remainder of the setup is implemented with psychopg2. A set of functions is executed to connect with the database, check for the existence of a PostGIS extension and the database tables. Then, both are added and the tables are filled with data taken from CSV files [stored online in this GitHub repository](https://github.com/Christina1281995/spatial_database_festival_backend/tree/main/data). Since there are quite a few functions, a summarized list for reference is placed further towards the bottom of this README page. Please also refer to the [functions.py](https://github.com/Christina1281995/spatial_database_festival_backend/blob/main/src/functions.py) file itself.
 
 
 ### User Interaction
@@ -196,7 +196,7 @@ The outputs of task 4 and 5 to show how the query results change if the user upd
 
 
 
-## Functions
+## A Summarized List of the Functions
 
 | Function | Purpose | Returns |
 | ------------- | ------------- | ------------ |
@@ -214,5 +214,20 @@ The outputs of task 4 and 5 to show how the query results change if the user upd
 | def **map**(userY, userX, show) | Creates a pop up map via tkinter and loads markers or paths into the map according to the arguments (="shows") and the user's position. This function is only called if the boolean variable "map" is set to True. | / |
 | def **decide**() | User interaction logic to find out what task the user wants to do. This function also asks for the user's location if the chosen task requires it. If none is required the user's position is set to 0,0. | **userX** - user's x position, **userY** - user's y position, **task** - the chosen task number |
 
+<br>
+
+## Reflection and Conclusion
+
+In sum, this programme is not as dynamic as I would have like it to be. The fact that the tkinter pop-up map requires a geometry input which is quite different from that given in postgres made it very difficult to dynamically display items in the tkinter  map dynamically. The psycopg2 return values from an SQL query were formatted in an object that I could not edit in the same way as editing strings is possible (e.g. with the .split() or .replace() functions). 
+
+| Postgres geom as text | 	"POINT(23.66940043 35.49462787)" |
+|----- | ----- |
+| **Tkinter geom type** |	**map_widget.set_marker(35.49462787, 23.6694004)** |
+
+Many lines of code also dedicated to the print() function, simply to make the output in the console more user-friendly. In a professional environment, much more work would have to flow into the dynamism of the programme and the user interaction (which should be in the form of an actual app). 
+
+These shortcomings are outweighed by the newly gained skills in handling a spatial database, creating dynamic SQL queries, working with psycopg2 and rendering a simple tkinter map. In particular, I highly enjoyed bringing together the complete process of conceptualising an idea for a database/ app and then implementing it in a functioning programme. I especially like to focus on making processes easy for the user, which is why I spent a lot of time on making the installation as straightforward as possible and setup as effortless as possible for the user (e.g. by creating a function that automatically loads all data into the database). This project has undoubtedly taught me valuable skills for any future projects involving both spatial or non-spatial databases.
+
+<br> 
 
 _By Christina Zorenboehmer_
