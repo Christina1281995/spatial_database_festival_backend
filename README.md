@@ -91,6 +91,10 @@ An output of task 12 ("Find the closest stage"):
 
 <img src="https://user-images.githubusercontent.com/81073205/156769144-5f461047-2312-4183-9e23-0a441d805b92.png" width="75%">
 
+An output of task 11 ("Find out which events are happening near me today"):
+
+<img src="https://user-images.githubusercontent.com/81073205/156873995-2a851bc5-2e84-4bd5-910c-302a97b68dc0.png" width="75%">
+
 An output of task 1 ("Find out if more staff are needed at any food stalls"):
 
 <img src="https://user-images.githubusercontent.com/81073205/156769713-edbec7bc-5a10-4547-9bdb-fbe51dd9a05c.png" width="75%">
