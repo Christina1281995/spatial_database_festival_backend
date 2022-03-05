@@ -60,7 +60,7 @@ The tables below show the different interactions available to the user. Please n
 **Decision 2 - FOR STAFF: "What would you like to do right now?"**
 
 | Option | Value | Query |
-| :-------------: | ------------- | ---------- |
+| :-----: | --------- | ------------- |
 | 1 | Find out if more members of staff are needed at any food stalls | ![image](https://user-images.githubusercontent.com/81073205/156790666-31cb3ccb-bdb7-4e8c-8efb-ea9023b6bf16.png) |
 | 2 | Update the number of staff members at a food stall | ![image-removebg-preview (1)](https://user-images.githubusercontent.com/81073205/156790743-16948c6a-3698-4db2-a37b-bb01e9e6d557.png) |
 | 3 | Update the number of visitors in a food area | ![image](https://user-images.githubusercontent.com/81073205/156790595-e7688883-ebab-4599-bfb1-52ea054f676f.png) |
@@ -70,7 +70,7 @@ The tables below show the different interactions available to the user. Please n
 **Decision 2 - FOR VISITORS: "What would you like to do right now?"**
 
 | Option | Value | Query |
-| :-------------: | ------------- | ------------- |
+| :-----: | --------- | ------------- |
 | 6 | Find out which food areas are not busy | ![image](https://user-images.githubusercontent.com/81073205/156789804-cfe19241-db67-43a4-91d9-8cdc44956428.png) |
 | 7 | Find the closest food stall | ![156789949-3e7d88b3-f4c4-426f-b298-5c345c2eed4e-removebg-preview](https://user-images.githubusercontent.com/81073205/156790194-65ca6522-febd-40ef-abfd-3149e3a08fbd.png) |
 | 8 | Find the closest not busy food stall |  ![image](https://user-images.githubusercontent.com/81073205/156789624-63e4d1cd-a7f4-4f35-a3de-ad6f1fd5737e.png) |
