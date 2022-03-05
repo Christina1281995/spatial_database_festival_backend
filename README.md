@@ -111,6 +111,7 @@ Again an output of task 1, but after executing task 2 to upate the current staff
 
 | Function | Purpose | Returns |
 | ------------- | ------------- | ------------ |
+| def **connection_params**() | Welcomes the user and helps set up the connection parameters for the database. | **host**, **database**, **user**, **password** - all the parameters needed to connect with psycopg2 |
 | def **connect**(host, database, user, password) | Establishes the connection to the database via psycopg2  | **con** - a psycopg2 connection |
 | def **check_exists**(con, table)  | Checks for exisitng tables in the database.  | **exists** - the database's boolean return value from the query (TRUE or FALSE) |
 | def **sql_in**(con, sql_statement) | Inserts a statement into a given table. | / |
